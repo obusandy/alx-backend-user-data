@@ -25,7 +25,6 @@ def get_logger() -> logging.Logger:
     usrdata.addFilter(usrhdr)
     return usrdata
 
-
 def get_db() -> mysql.connector.connection.MySQLConnection:
     """
     Establishes a connection to the MySQL database with the environmental var
@@ -33,23 +32,22 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
         A MySQLConnection obj
     """
     db_conntn = mysql.connector.connect(
-        user=getenv("PERSONAL_DATA_DB_USERNAME", "root"),
-        password=getenv("PERSONAL_DATA_DB_PASSWORD", ""),
-        host=getenv("PERSONAL_DATA_DB_HOST", "localhost"),
-        database=getenv("PERSONAL_DATA_DB_NAME")
-    )
+            user=getenv("PERSONAL_DATA_DB_USERNAME", "root"),
+            password=getenv("PERSONAL_DATA_DB_PASSWORD", ""),
+            host=getenv("PERSONAL_DATA_DB_HOST", "localhost"),
+            database=getenv("PERSONAL_DATA_DB_NAME")
+        )
     return db_conntn
 
 def filter_datum(fields: List[str],
                  redaction: str, message: str, separator: str) -> str:
     """filter datym  use re.sub to perform the sub with a single regex."""
     return re.sub(rf'({"|".join(fields)})=[^{separator}]*',
-                  rf'\1={redaction}', message)
+            rf'\1={redaction}', message)
 
 class RedactingFormatter(logging.Formatter):
     """A custom logging formatter that redacts specified fields in
     """
-
     REDACTION = "***"
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
@@ -66,7 +64,7 @@ class RedactingFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """ Formats a log record, redacting specified fields. """
         record.msg = filter_datum(self.fields, self.REDACTION,
-                                  record.getMessage(), self.SEPARATOR)
+                record.getMessage(), self.SEPARATOR)
         return super().format(record)
 
 def main() -> None:
@@ -84,7 +82,6 @@ def main() -> None:
 
     usr.close()
     dbconnctn.close()
-
 
 if __name__ == '__main__':
     main()

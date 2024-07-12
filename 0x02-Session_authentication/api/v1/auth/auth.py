@@ -64,3 +64,18 @@ class Auth:
             None if otherwise
         """
         return None
+
+    def session_cookie(self, request=None):
+        """
+        Returns: a cookie value from a request
+        the value of the cookie named _my_session_id from request
+        """
+        if request is None:
+            return None
+
+        session_name = getenv('SESSION_NAME')
+
+        if session_name is None:
+            return None
+
+        return request.cookie.get(session_name)

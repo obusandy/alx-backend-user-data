@@ -7,7 +7,8 @@ from api.v1.views import app_views
 from flask import Flask, jsonify, abort, request
 from flask_cors import (CORS, cross_origin)
 import os
-
+from api.v1.auth.basic_auth import BasicAuth
+from api.v1.auth.session_auth import SessionAuth
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
@@ -53,6 +54,33 @@ def forbidden(error) -> str:
     """
     return jsonify({"error": "Forbidden"}), 403
 
+@app.before_request
+def authenticate_user():
+    """
+    Authenticate the user before processing any request.
+    This function is executed before every request
+    ensure that the user is authenticated.
+    Returns:
+    authorization header or a session cookie. If not
+    a 401 error
+    """
+    if auth:
+        # List of paths that do not require auth
+        excluded_paths = [
+            '/api/v1/status/',
+            '/api/v1/unauthorized/',
+            '/api/v1/forbidden/',
+            '/api/v1/auth_session/login/',
+        ]
+        if auth.require_auth(request.path, excluded_paths):
+            auth_header = auth.authorization_header(request)
+            sessn_coockie = auth.session_cookie(request)
+            user = auth.current_user(request)
+            if auth_header is None and auth.session_cookie(request) is None:
+                abort(401)
+            if request.current_user is None:
+                abort(403)
+            request.current_user = auth.current_user(request)
 
 if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")

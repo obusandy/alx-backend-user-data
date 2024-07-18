@@ -55,6 +55,7 @@ class SessionAuth (Auth):
         Returns: FalseIf the request is equal to None
         Returns: FalseIf the request doesnt contain the Session ID cookie
         """
+
         if request:
             session_id = self.session_cookie(request)
             if not session_id:

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-""""""
-from models.user import User
-from .auth import Auth
-from uuid import uuid4
+""" Module for Session Authentication """
 
-class SessionAuth(Auth):
+
+from api.v1.auth.auth import Auth
+from models.user import User
+import uuid
+
+
+class SessionAuth (Auth):
     """
     a class SessionAuth that inherits from Auth.
     this class is empty.
@@ -19,21 +22,19 @@ class SessionAuth(Auth):
             Returns: None if user_id is None
             Returns: None if user_id is not a string
         """
-        if user_id and isinstance(user_id, str):
-            session_id = str(uuid4())
-            self.user_id_by_session_id[session_id] = user_id
+        if isinstance(user_id, str):
+            session_id = str(uuid.uuid4())
+            SessionAuth.user_id_by_session_id[session_id] = user_id
             return session_id
-        return None
 
     def user_id_for_session_id(self, session_id: str = None) -> str:
         """below is an instance method that
-        Returns: a User ID based on a Session ID:
-        Returns: None if session_id is None
-        Returns: None if session_id is not a string
+            Returns: a User ID based on a Session ID:
+            Returns: None if session_id is None
+            Returns: None if session_id is not a string
         """
-        if session_id and isinstance(session_id, str):
-            return self.user_id_by_session_id.get(session_id, None)
-        return None
+        if isinstance(session_id, str):
+            return SessionAuth.user_id_by_session_id.get(session_id)
 
     def current_user(self, request=None):
         """
@@ -42,8 +43,8 @@ class SessionAuth(Auth):
         Attr:
             self
         """
-        user_id = self.user_id_for_session_id(self.session_cookie(request))
-        return User.get(user_id)
+        return User.get(
+            self.user_id_for_session_id(self.session_cookie(request)))
 
     def destroy_session(self, request=None):
         """
@@ -54,10 +55,11 @@ class SessionAuth(Auth):
         Returns: FalseIf the request is equal to None
         Returns: FalseIf the request doesnt contain the Session ID cookie
         """
-        session_id = self.session_cookie(request)
-        user_id = self.user_id_for_session_id(session_id)
-        if (request is None or session_id is None) or user_id is None:
-            return False
-        if session_id in self.user_id_by_session_id:
-            del self.user_id_by_session_id[session_id]
-        return True
+        if request:
+            session_id = self.session_cookie(request)
+            if not session_id:
+                return False
+            if not self.user_id_for_session_id(session_id):
+                return False
+            self.user_id_by_session_id.pop(session_id)
+            return True

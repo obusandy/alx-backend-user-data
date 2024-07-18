@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-""" Module of Index views
+"""
+module defines routes for status checking, statistics,
+and handling
+unauthorized and forbidden requests for the API.
 """
 from flask import jsonify, abort
 from api.v1.views import app_views
@@ -7,40 +10,40 @@ from api.v1.views import app_views
 
 @app_views.route('/status', methods=['GET'], strict_slashes=False)
 def status() -> str:
-    """ GET /api/v1/status
-    Return:
-      - the status of the API
+    """
+     Returns a JSON response with a status of "OK"
+     Means the Api is up
+        Response: JSON response indicating the status.
     """
     return jsonify({"status": "OK"})
 
 
 @app_views.route('/stats/', strict_slashes=False)
 def stats() -> str:
-    """ GET /api/v1/stats
-    Return:
-      - the number of each objects
+    """
+    Returns a JSON response containing the count of
+    various objts in the system.
+    Returns:
+        Respns: JSON response with statistics
     """
     from models.user import User
     stats = {}
     stats['users'] = User.count()
     return jsonify(stats)
 
-@app_views.route('/unauthorized/', strict_slashes=False)
+
+@app_views.route('/unauthorized', methods=['GET'], strict_slashes=False)
 def unauthorized() -> str:
-    """GET /api/v1/unauthorized
-    Return:
-      -  HTTP status code for a request unauthorized
-      - 401 status code
+    """
+    status code for a request unauthorized 401 of course
     """
     abort(401)
 
 
-@app_views.route('/forbidden/', strict_slashes=False)
+@app_views.route('/forbidden', methods=['GET'], strict_slashes=False)
 def forbidden() -> str:
-    """GET /api/v1/forbidden
-    Return:
-      - HTTP status code for a request where
-      - the user is authenticate but not allowed
-      - to access to a resource(403)
+    """
+    status code for a request where the user is authenticate
+    but not allowed to access to a resource
     """
     abort(403)
